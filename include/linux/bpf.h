@@ -1509,4 +1509,15 @@ enum bpf_text_poke_type {
 int bpf_arch_text_poke(void *ip, enum bpf_text_poke_type t,
 		       void *addr1, void *addr2);
 
+#if defined(__KERNEL__) && !defined(__ASSEMBLY__)
+#ifdef CONFIG_BPF_KPROBE_OVERRIDE
+#define BPF_ALLOW_ERROR_INJECTION(fname)				\
+static unsigned long __used						\
+	__attribute__((__section__("_kprobe_error_inject_list")))	\
+	_eil_addr_##fname = (unsigned long)fname;
+#else
+#define BPF_ALLOW_ERROR_INJECTION(fname)
+#endif
+#endif
+
 #endif /* _LINUX_BPF_H */

@@ -138,6 +138,15 @@
 #define KPROBE_BLACKLIST()
 #endif
 
+#ifdef CONFIG_BPF_KPROBE_OVERRIDE
+#define ERROR_INJECT_LIST()	. = ALIGN(8);						\
+				VMLINUX_SYMBOL(__start_kprobe_error_inject_list) = .;	\
+				KEEP(*(_kprobe_error_inject_list))			\
+				VMLINUX_SYMBOL(__stop_kprobe_error_inject_list) = .;
+#else
+#define ERROR_INJECT_LIST()
+#endif
+
 #ifdef CONFIG_FUNCTION_ERROR_INJECTION
 #define ERROR_INJECT_WHITELIST()	. = ALIGN(8);			      \
 			VMLINUX_SYMBOL(__start_error_injection_whitelist) = .;\
@@ -605,6 +614,7 @@
 	FTRACE_EVENTS()							\
 	TRACE_SYSCALLS()						\
 	KPROBE_BLACKLIST()						\
+	ERROR_INJECT_LIST()						\
 	ERROR_INJECT_WHITELIST()					\
 	MEM_DISCARD(init.rodata)					\
 	CLK_OF_TABLES()							\
