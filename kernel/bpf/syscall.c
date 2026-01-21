@@ -24,7 +24,6 @@
 #include <linux/ctype.h>
 #include <linux/nospec.h>
 #include <uapi/linux/btf.h>
-#include <linux/poll.h>
 
 #define IS_FD_ARRAY(map) ((map)->map_type == BPF_MAP_TYPE_PERF_EVENT_ARRAY || \
 			  (map)->map_type == BPF_MAP_TYPE_CGROUP_ARRAY || \
@@ -510,16 +509,6 @@ out:
 	return err;
 }
 
-static __poll_t bpf_map_poll(struct file *filp, struct poll_table_struct *pts)
-{
-	struct bpf_map *map = filp->private_data;
-
-	if (map->ops->map_poll)
-		return map->ops->map_poll(map, filp, pts);
-
-	return EPOLLERR;
-}
-
 const struct file_operations bpf_map_fops = {
 #ifdef CONFIG_PROC_FS
 	.show_fdinfo	= bpf_map_show_fdinfo,
@@ -528,7 +517,6 @@ const struct file_operations bpf_map_fops = {
 	.read		= bpf_dummy_read,
 	.write		= bpf_dummy_write,
 	.mmap		= bpf_map_mmap,
-	.poll		= bpf_map_poll,
 };
 
 int bpf_map_new_fd(struct bpf_map *map, int flags)
